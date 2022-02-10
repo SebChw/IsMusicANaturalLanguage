@@ -1,0 +1,8 @@
+data
+audio_to_midi_melodia
+*.json
+entropy_outcomes
+rememberToSetEnvvariable
+model.pt
+*.txt
+*.pyc
