@@ -1,5 +1,6 @@
 data
 audio_to_midi_melodia
+audio_to_midi
 *.json
 entropy_outcomes
 rememberToSetEnvvariable
