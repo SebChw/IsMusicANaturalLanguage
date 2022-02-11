@@ -3,6 +3,7 @@ from midiToTxt import converter as c
 import pypianoroll
 import os
 from midiToTxt import compressor
+from mido.midifiles.meta import KeySignatureError
 
 
 class Creator():
@@ -25,7 +26,7 @@ class Creator():
                         try:
                             # ! Some midi files may be invalid so we just skip them
                             multitrack = pypianoroll.read(path)
-                        except (IOError, ValueError, EOFError) as e:
+                        except (IOError, ValueError, EOFError, KeySignatureError, IndexError) as e:
                             print(f"Invalid MIDI file at {path}: {str(e)}")
                             continue
 
@@ -41,6 +42,7 @@ class Creator():
                         # if "\r" in converted:
                         #     print(path)
                         #     break
+                        # print(len(converted))
                         destination.write(converted)
                         destination.write(songs_separator)
                         saved += 1
@@ -50,6 +52,6 @@ class Creator():
 
 if __name__ == '__main__':
     creator = Creator("data/lmd_matched",
-                      merged_file_name="lstm_dataset_compressed.txt")
+                      merged_file_name="lstm_dataset_compressed_very_small.txt")
     creator.prepare_data(".", compression_type="lossless",
-                         tokens_to_use=200, songs_separator="\n", how_much_to_save=1)
+                         tokens_to_use=200, songs_separator="\n", how_much_to_save=10)

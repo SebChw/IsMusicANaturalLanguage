@@ -89,7 +89,7 @@ class MidiTxtConverter:
 
         # Set time_step to the first non silent place
         starting_point = self.find_starting_point(
-            1000, pointers, instrument_notes_played)
+            instrument_piano_rolls[0].shape[0], pointers, instrument_notes_played)
 
         length_of_song = instrument_piano_rolls[0].shape[0] if token_limit < 1 else (
             token_limit + 1 + starting_point)
