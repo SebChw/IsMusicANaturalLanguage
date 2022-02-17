@@ -8,3 +8,15 @@ model.pt
 *.txt
 *.pyc
 *.pt
+midi
+*.mid
+pytorch-rnn-sequence-generation-classification-master
+*.pth
+scraper/genresDataset
+*.exe
+*.png
+*.log
+musicautobot
+midi21.ipynb
+secondmidiToTxt.ipynb
+scraper.ipynb

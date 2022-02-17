@@ -58,12 +58,28 @@ class MidiTxtConverter:
 
         for category in categorized.keys():
             # Merging entire Multitrack into one pianoroll
-            categorized[category] = categorized[category].blend()[
-                :, first_note:last_note+1]
+            #print(category)
+            if len(categorized[category].tracks) > 0:
+                categorized[category] = categorized[category].blend()[
+                    :, first_note:last_note+1]
 
         return categorized
 
-    def multitrack_to_string(self, multitrack: pypianoroll.Multitrack,  split_sections=True, first_note=21, last_note=108, token_limit=-1):
+    def blend(self,multitrack, first_note, last_note, with_drums=True):
+        if with_drums:
+            return multitrack.blend()[:, first_note:last_note+1]
+        else:
+            blended = pypianoroll.Multitrack()
+            
+            for track in multitrack.tracks:
+                if not track.is_drum:
+                    blended.append(track)
+                    
+            if len(blended.tracks) > 0:       
+                return blended.blend()[:, first_note:last_note+1]
+            
+    
+    def multitrack_to_string(self, multitrack: pypianoroll.Multitrack,  split_sections=True, first_note=21, last_note=108, token_limit=-1, with_drums=True):
         #! Maybe some categorization is needed: sections_separately = False or True
         """Function given a multitrack maps it into plain ASCII text. By default we map notes from A0 to C8. We do not map 
         it 1:1 to ASCII we do it with ofset equal to 13. We do it to be able to use space and exclamation mark as a special
@@ -79,8 +95,13 @@ class MidiTxtConverter:
         offset = 13 + first_note  # Since we want quite nice interpretation. WE set some offset and since we cut from 0-21 we must add first_note
         time_separator = " "
         section_separator = "!" if split_sections else ""
-        categorized = self.categorize(multitrack, first_note, last_note) if split_sections else {
-            'everything': multitrack.blend()[:, first_note:last_note+1]}
+        if split_sections:
+            categorized = self.categorize(multitrack, first_note, last_note,with_drums=with_drums)
+        else:
+            categorized = {'everything': self.blend(multitrack, first_note, last_note, with_drums=with_drums)}
+            if categorized['everything'] is None:
+                return None
+        
         instrument_piano_rolls = list(categorized.values())
         instrument_notes_played = [np.transpose(np.nonzero(
             instrument)) for instrument in instrument_piano_rolls]

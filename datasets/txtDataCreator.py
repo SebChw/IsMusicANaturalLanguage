@@ -12,7 +12,7 @@ class Creator():
         self.categories = categories
         self.merged_file_name = merged_file_name
 
-    def prepare_data(self, destination_folder: str, categorize=False, split_sections=False, compression_type=None, how_much_to_save=500, tokens_to_use=-1, songs_separator=" "):
+    def prepare_data(self, destination_folder: str, categorize=False, split_sections=False, compression_type=None, how_much_to_save=500, tokens_to_use=-1, songs_separator=" ", with_drums=True):
         # Compression type can be None, lossy, lossles
         converter = c.MidiTxtConverter()
         saved = 0
@@ -23,16 +23,22 @@ class Creator():
                 for root, subdirs, files in os.walk(self.data_path):
                     for f in files:
                         path = os.path.join(root, f)
+                        #print(f"working with: {path}")
                         try:
                             # ! Some midi files may be invalid so we just skip them
                             multitrack = pypianoroll.read(path)
                         except (IOError, ValueError, EOFError, KeySignatureError, IndexError) as e:
-                            print(f"Invalid MIDI file at {path}: {str(e)}")
+                            print(
+                                f"Invalid MIDI file at {path}: {str(e)}.")
+                            #os.remove(path)
                             continue
 
                         converted = converter.multitrack_to_string(
-                            multitrack, split_sections=split_sections, token_limit=tokens_to_use)
+                            multitrack, split_sections=split_sections, with_drums=with_drums)
 
+                        if converted is None:
+                            print("Empty track!")
+                            continue
                         if compression_type == "lossy":
                             converted = compressor.lossy_compresion(converted)
                         elif compression_type == "lossless":
@@ -46,12 +52,12 @@ class Creator():
                         destination.write(converted)
                         destination.write(songs_separator)
                         saved += 1
-                    if saved > how_much_to_save:
-                        break
-
+                        #return
+                    # if saved > how_much_to_save:
+                    #     break
 
 if __name__ == '__main__':
-    creator = Creator("data/lmd_matched",
-                      merged_file_name="lstm_dataset_compressed_very_small.txt")
-    creator.prepare_data(".", compression_type="lossless",
-                         tokens_to_use=200, songs_separator="\n", how_much_to_save=10)
+    creator = Creator("scraper/genresDataset/jazz",
+                      merged_file_name="entropy_data/jazz_no_drums.txt")
+    creator.prepare_data(".", compression_type="lossy",
+                         tokens_to_use=200, songs_separator="\n", how_much_to_save=10, with_drums=False)
