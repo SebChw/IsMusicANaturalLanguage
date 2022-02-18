@@ -4,27 +4,39 @@ from collections import defaultdict
 
 
 class BetterMidiToTxtConverter:
-    def __init__(self,):
+    def __init__(self,resolution=8):
         self.biggest_roll = (0,0) # biggest shape of the roll encountered. (timesteps, notes). To know how big array to do
         self.NOTE_PREFIX = "n"
         self.DURATION_PREFIX = "t"
         self.PAUSE_PREFIX = "w"
         self.PAUSE_TOKEN = -1 #Special note event
+        self.resolution = resolution
     
-    def midi_to_txt(self, midi_path: str, txt_path: str, with_drums=False):
-        multitrack = pypianoroll.read(midi_path)
-
-        duration_roll = self.track_to_duration_roll(multitrack, with_drums)
-        events_array = self.duration_roll_to_events_array(duration_roll)
-        converted = self.events_to_str(events_array)
-
+    def midi_to_txt(self, midi_path: str, txt_path: str, with_drums=False, save_last_pause=False):
         with open(txt_path, 'w') as f:
-            f.write(converted)
-
+            f.write(self.midi_to_str(midi_path, with_drums, save_last_pause))
+            
+    def midi_to_str(self, midi_path,  with_drums=False, save_last_pause=False) -> str:
+        multitrack = pypianoroll.read(midi_path, resolution = self.resolution)
+        
+        duration_roll = self.track_to_duration_roll(multitrack, with_drums)
+        events_array = self.duration_roll_to_events_array(duration_roll,save_last_pause)
+        converted = self.events_to_str(events_array)
+        
+        return converted
+    
+    def set_biggest_roll(self, biggest_roll):
+        self.biggest_roll = biggest_roll
+        
     def txt_to_midi(self, txt_path: str, midi_path: str):
         with open(txt_path, 'r') as f:
-            multitrack = self.string_to_multitrack(f.read())
-
+            self.str_to_midi(f.read(), midi_path)
+        
+    def str_to_midi(self, text, midi_path, power=100):
+        roll = self.str_to_piano_roll(text, power=power)
+        multitrack = pypianoroll.Multitrack(resolution=self.resolution)
+        multitrack.append(pypianoroll.StandardTrack(pianoroll=roll))
+        
         pypianoroll.write(midi_path, multitrack)
     
     def track_to_duration_roll(self, multitrack, with_drums=False):
@@ -100,7 +112,7 @@ class BetterMidiToTxtConverter:
                 
         return " ".join(text)
     
-    def str_to_piano_roll(self, txt):
+    def str_to_piano_roll(self, txt, power=1):
         piano_roll = np.zeros(self.biggest_roll)
         tokens = txt.split(" ")
         #print(tokens)
@@ -112,23 +124,25 @@ class BetterMidiToTxtConverter:
                 current_timestep += time_value
             else:
                 note_value = int(note[1:])
-                piano_roll[current_timestep: current_timestep + time_value, note_value] = 1
+                piano_roll[current_timestep: current_timestep + time_value, note_value] = power
                 
         current_timestep += time_value
 
         return piano_roll[:current_timestep,:]
     
 if __name__ == "__main__":
-    converter = BetterMidiToTxtConverter()
+    converter = BetterMidiToTxtConverter(resolution=4)
     midi_path = "scraper/genresDataset/jazz/billevans/AutumnLeaves.mid"
     multitrack = pypianoroll.read(midi_path, resolution=4)
     #print(multitrack.tempo)
     roll = multitrack.blend()
     binarized_roll = roll > 1
     
-    duration_roll = converter.track_to_duration_roll(multitrack, with_drums=True)
-    events_array = converter.duration_roll_to_events_array(duration_roll, save_last_pause=True)
-    converted = converter.events_to_str(events_array)
+    # duration_roll = converter.track_to_duration_roll(multitrack, with_drums=True)
+    # events_array = converter.duration_roll_to_events_array(duration_roll, save_last_pause=True)
+    # converted = converter.events_to_str(events_array)
+    
+    converted = converter.midi_to_str(midi_path, with_drums=True, save_last_pause=True)
     converted_piano_roll = converter.str_to_piano_roll(converted)
     
     assert np.all(binarized_roll == converted_piano_roll)
