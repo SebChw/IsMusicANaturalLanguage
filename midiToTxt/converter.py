@@ -6,12 +6,12 @@ class MidiTxtConverter:
     def __init__(self,):
         pass
 
-    def midi_to_txt(self, midi_path: str, txt_path: str, split_sections=True):
+    def midi_to_txt(self, midi_path: str, txt_path: str, split_sections=True,with_drums=False, compress_function= lambda x: x):
         multitrack = pypianoroll.read(midi_path)
 
-        converted = self.multitrack_to_string(
-            multitrack, split_sections=split_sections)
-
+        converted = compress_function(self.multitrack_to_string(
+            multitrack, split_sections=split_sections, with_drums=with_drums))
+        
         with open(txt_path, 'w') as f:
             f.write(converted)
 

@@ -20,3 +20,5 @@ musicautobot
 midi21.ipynb
 secondmidiToTxt.ipynb
 scraper.ipynb
+*.pdf
+Presentation Data

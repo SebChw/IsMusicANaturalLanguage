@@ -33,10 +33,10 @@ class EntropyCalculator:
         """
         if (order not in self.words_distributions) and words:
             self.words_distributions[order] = distribution.calculate_distribution(
-                inf_source=self.corpus, order=order, words=words, mapping=self.mapping)
+                inf_sources=self.corpus.split("\n"), order=order, words=words, mapping=self.mapping)
         elif (order not in self.chars_distributions):
             self.chars_distributions[order] = distribution.calculate_distribution(
-                inf_source=self.corpus, order=order, words=words)
+                inf_sources=self.corpus.split("\n"), order=order, words=words)
 
     def remove_distribution(self, order=0):
         """If we are sure that we won't need some distribution we can remove the distribution easily

@@ -5,7 +5,7 @@ from IPython.display import display
 PLOT_COLORS = ['blue', 'green', 'red', 'yellow', 'cyan', 'magenta', 'black']
 
 
-def get_plot(chars_entropy, words_entropy, unit="bits", languages=["English"], marker='0'):
+def get_plot(chars_entropy, words_entropy, unit="bits", languages=["English"], marker='0', save_path = None):
     """Function given two arrays generate two plots in one figure
 
     Args:
@@ -18,11 +18,12 @@ def get_plot(chars_entropy, words_entropy, unit="bits", languages=["English"], m
     fig, ax = plt.subplots(1, 2, figsize=(20, 7))
     orders = range(len(chars_entropy[0]))
 
-    ax[0].set_title("Entropy of characters")
-    ax[1].set_title("Entropy of words")
+    ax[0].set_title("Entropy of next character, given n previous characters")
+    ax[1].set_title("Entropy of next word, given n previous words")
 
+    types = ["characters", "words"]
     for i in range(len(ax)):
-        ax[i].set_xlabel("Conditional Entropy Order")
+        ax[i].set_xlabel(f"n previous {types[i]}")
         ax[i].set_ylabel(f"Condional Entropy [{unit}]")
         ax[i].xaxis.set_major_locator(MaxNLocator(integer=True))
 
@@ -33,3 +34,6 @@ def get_plot(chars_entropy, words_entropy, unit="bits", languages=["English"], m
                    color=PLOT_COLORS[i], marker=marker)
 
     fig.legend()
+    
+    if save_path is not None:
+        fig.savefig(save_path, dpi=800)
