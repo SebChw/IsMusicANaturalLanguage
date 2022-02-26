@@ -1,7 +1,9 @@
 import pypianoroll
 import numpy as np
 
-
+"""
+This is converter for the first representation of midi as a text
+"""
 class MidiTxtConverter:
     def __init__(self,):
         pass
@@ -65,7 +67,18 @@ class MidiTxtConverter:
 
         return categorized
 
-    def blend(self,multitrack, first_note, last_note, with_drums=True):
+    def blend(self,multitrack, first_note=21, last_note=108, with_drums=True) -> np.array:
+        """This function takes multitrack with many instrument and many pianorolls, and blend them into one piano roll containing all sounds.
+
+        Args:
+            multitrack (_type_): Multitrack to be blended
+            first_note (_type_): first note to be used, we can neglect first 20 very low notes
+            last_note (_type_): last note to be used, we can neglect last notes that are too high
+            with_drums (bool, optional): Whether to blend drums track too. Defaults to True.
+
+        Returns:
+            _type_: np.array with blended pianoroll
+        """
         if with_drums:
             return multitrack.blend()[:, first_note:last_note+1]
         else:
@@ -80,7 +93,6 @@ class MidiTxtConverter:
             
     
     def multitrack_to_string(self, multitrack: pypianoroll.Multitrack,  split_sections=True, first_note=21, last_note=108, token_limit=-1, with_drums=True):
-        #! Maybe some categorization is needed: sections_separately = False or True
         """Function given a multitrack maps it into plain ASCII text. By default we map notes from A0 to C8. We do not map 
         it 1:1 to ASCII we do it with ofset equal to 13. We do it to be able to use space and exclamation mark as a special
         characters. Space corresponds to next unit of time and ! means change of the section.
@@ -131,6 +143,15 @@ class MidiTxtConverter:
         return converted
 
     def string_to_multitrack(self, text: str, programs=[1, 26, 34, 65, 0]) -> pypianoroll.Multitrack:
+        """_summary_
+
+        Args:
+            text (str): _description_
+            programs (list, optional): programs to be used for piano, guitar, bass etc. Only useful when sections are separated. Defaults to [1, 26, 34, 65, 0].
+
+        Returns:
+            pypianoroll.Multitrack:
+        """
         offset = 13
         time_separator = " "
         section_separator = "!"

@@ -1,24 +1,16 @@
 data
-audio_to_midi_melodia
-audio_to_midi
 *.json
-entropy_outcomes
-rememberToSetEnvvariable
-model.pt
 *.txt
 *.pyc
 *.pt
-midi
 *.mid
-pytorch-rnn-sequence-generation-classification-master
 *.pth
 scraper/genresDataset
 *.exe
 *.png
 *.log
-musicautobot
-midi21.ipynb
-secondmidiToTxt.ipynb
-scraper.ipynb
 *.pdf
 Presentation Data
+chromedriver.exe
+entropy_data_preparation.ipynb
+minGPT

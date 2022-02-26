@@ -2,15 +2,17 @@ import pypianoroll
 import numpy as np
 from collections import defaultdict
 
-
+"""
+This is converter for second representation of midi as a text
+"""
 class BetterMidiToTxtConverter:
     def __init__(self,resolution=8):
         self.biggest_roll = (0,0) # biggest shape of the roll encountered. (timesteps, notes). To know how big array to do
-        self.NOTE_PREFIX = "n"
-        self.DURATION_PREFIX = "t"
-        self.PAUSE_PREFIX = "w"
+        self.NOTE_PREFIX = "n" # each pitch will be in a format nx. where x is number from o to 128
+        self.DURATION_PREFIX = "t" # this token represent how long given event should last
+        self.PAUSE_PREFIX = "w" #this token represent to wait idly
         self.PAUSE_TOKEN = -1 #Special note event
-        self.resolution = resolution
+        self.resolution = resolution # the bigger resolution the more detailed representation but also longer sequences
     
     def midi_to_txt(self, midi_path: str, txt_path: str, with_drums=False, save_last_pause=False):
         with open(txt_path, 'w') as f:
@@ -33,6 +35,13 @@ class BetterMidiToTxtConverter:
             self.str_to_midi(f.read(), midi_path)
         
     def str_to_midi(self, text, midi_path, power=100):
+        """
+
+        Args:
+            text (_type_): _description_
+            midi_path (_type_): _description_
+            power (int, optional): default velocity of notes being played. Defaults to 100.
+        """
         roll = self.str_to_piano_roll(text, power=power)
         multitrack = pypianoroll.Multitrack(resolution=self.resolution)
         multitrack.append(pypianoroll.StandardTrack(pianoroll=roll))
@@ -40,6 +49,16 @@ class BetterMidiToTxtConverter:
         pypianoroll.write(midi_path, multitrack)
     
     def track_to_duration_roll(self, multitrack, with_drums=False):
+        """duration roll is just a numpy array but, number in it denotes for how long given note was played
+
+        Args:
+            multitrack (_type_): multitrack to be converted
+            with_drums (bool, optional): whether to put drums in the roll. Defaults to False.
+
+        Returns:
+            _type_: np.array with durations
+        """
+        #At the beginning just upload biggest_roll shape
         roll = multitrack.blend()
         if roll.shape[0] > self.biggest_roll[0]:
             self.biggest_roll = roll.shape
@@ -50,10 +69,12 @@ class BetterMidiToTxtConverter:
         for track in multitrack.tracks:
             if not track.is_drum or with_drums: # If track is no drum then we always convert it, or if we force to converts drums
                 roll = track.pianoroll
+                #we just store all events when the note was played in the set
                 for time, note in zip(*roll.nonzero()):
                     durations[note].add(time)
             
         for note, trigerred in durations.items():
+            #here we count how many times the note was repeated each time it was played
             trigerred = sorted(list(trigerred))
             curr = trigerred[0]
             duration = 0
@@ -67,7 +88,7 @@ class BetterMidiToTxtConverter:
                     curr = next
             
             duration_roll[curr-duration, note] = duration + 1
-        #print(np.sum(duration_roll))
+        
         return duration_roll
             
     def duration_roll_to_events_array(self, duration_roll, save_last_pause=False):
@@ -131,16 +152,12 @@ class BetterMidiToTxtConverter:
         return piano_roll[:current_timestep,:]
     
 if __name__ == "__main__":
+    #sanity check
     converter = BetterMidiToTxtConverter(resolution=4)
     midi_path = "scraper/genresDataset/jazz/billevans/AutumnLeaves.mid"
     multitrack = pypianoroll.read(midi_path, resolution=4)
-    #print(multitrack.tempo)
     roll = multitrack.blend()
     binarized_roll = roll > 1
-    
-    # duration_roll = converter.track_to_duration_roll(multitrack, with_drums=True)
-    # events_array = converter.duration_roll_to_events_array(duration_roll, save_last_pause=True)
-    # converted = converter.events_to_str(events_array)
     
     converted = converter.midi_to_str(midi_path, with_drums=True, save_last_pause=True)
     converted_piano_roll = converter.str_to_piano_roll(converted)

@@ -1,8 +1,9 @@
 from bs4 import BeautifulSoup
 import requests
-import re
 import os
 
+""" This script download all songs with given genre from midiworld.com
+"""
 genre_name = input(
     "type in genre name (lowercase, no space, no special characters): ")
 
@@ -15,6 +16,8 @@ folder = os.path.join("genresDataset", genre_name, "midiworld")
 if not os.path.isdir(folder):
     os.mkdir(folder)
 
+#Here I was lazy, the biggest genre on that page has 38 pages so I've done it that way.
+#If there is no page we will not get any answer, and just run the loop withouth doing anything.
 for i in range(1, 38):
     URL = f"https://www.midiworld.com/search/{i}/?q={genre_name}"
     page = requests.get(URL)

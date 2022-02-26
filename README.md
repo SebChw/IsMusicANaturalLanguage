@@ -1,0 +1,1 @@
+Repository with all scripts that I've used during preparing my presentation for GHOST Day. This readme will be then changed into mini presentation
