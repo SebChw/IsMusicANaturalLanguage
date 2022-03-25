@@ -49,9 +49,9 @@ Now we have data represented in a way we wanted so we can start our experiments.
 
 #### Deep learning models
 After seeing that this musical text behave like language I was more certain that typical NLP methods will be working. You can find all code considering this part in `notebooks`. At first 3 baselines was trained (All based on LSTM):
-* first on that uncompressed representation, just using multilabel classification at each step
-* Second on lossles compression representation. At each step multilabel classification + Poisson regression
-* Third one on the event based representation. Dictonary of words was created and then after each step we perform typical classification.
+* first on that uncompressed representation, just using multilabel classification at each step. [Baseline 1 sample](/readme_data/baseline1.mp3)
+* Second on lossles compression representation. At each step multilabel classification + Poisson regression. [Baseline 2 sample](/readme_data/baseline2.mp3)
+* Third one on the event based representation. Dictonary of words was created and then after each step we perform typical classification. [Baseline 3 sample](/readme_data/baseline3.mp3)
 
-I've got the most promising results from the third representation. That is why I used it to train GPT transformer, hoping for best results.
+I've got the most promising results from the third representation. That is why I used it to train GPT transformer, hoping for best results. [Transformer sample](/readme_data/transformer.mp3)
 
