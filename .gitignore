@@ -14,3 +14,5 @@ Presentation Data
 chromedriver.exe
 entropy_data_preparation.ipynb
 minGPT
+QuickPresentation*
+*.mp4
